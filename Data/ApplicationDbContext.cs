@@ -21,11 +21,26 @@ namespace LOGIN.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // 🔥 CONFIGURACIÓN GLOBAL: TODAS LAS FECHAS EN UTC
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateTime))
+                    {
+                        property.SetColumnType("timestamp with time zone");
+                    }
+                }
+            }
 
-            // ============================================
-            // USUARIOS
-            // ============================================
-            modelBuilder.Entity<Usuario>(entity =>
+            // ... resto de configuraciones (Usuario, Producto, etc.)
+        }
+
+
+        // ============================================
+        // USUARIOS
+        // ============================================
+        modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.ToTable("usuarios");
                 entity.HasKey(e => e.Id);
