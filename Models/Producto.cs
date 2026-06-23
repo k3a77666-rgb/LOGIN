@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LOGIN.Models  // ← Cambiado de LOGINModels a LOGIN.Models
 {
-    [Table("Productos")]
+    [Table("productos")]
     public class Producto
     {
         [Key]

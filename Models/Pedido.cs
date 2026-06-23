@@ -12,7 +12,7 @@ namespace LOGIN.Models
         Cancelado
     }
 
-    [Table("Pedidos")]
+    [Table("pedidos")]
     public class Pedido
     {
         [Key]
