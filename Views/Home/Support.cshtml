@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Soporte";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card-modern p-5 text-center">
+
+                <div class="mb-4">
+                    <i class="bi bi-headset fs-1 text-primary"></i>
+                </div>
+
+                <h2 class="fw-bold">Centro de Soporte</h2>
+                <p class="text-muted">
+                    ¿Necesitas ayuda? Contáctanos y te responderemos a la brevedad.
+                </p>
+
+                <hr class="my-4" />
+
+                <div class="text-start">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="support-icon">
+                            <i class="bi bi-envelope text-primary"></i>
+                        </div>
+                        <div>
+                            <span class="d-block fw-semibold">Correo Electrónico</span>
+                            <span class="text-muted small">soporte@miinventario.com</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="support-icon">
+                            <i class="bi bi-clock text-primary"></i>
+                        </div>
+                        <div>
+                            <span class="d-block fw-semibold">Horario de Atención</span>
+                            <span class="text-muted small">Lun - Vie: 9:00 AM - 6:00 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="support-icon">
+                            <i class="bi bi-whatsapp text-success"></i>
+                        </div>
+                        <div>
+                            <span class="d-block fw-semibold">WhatsApp</span>
+                            <span class="text-muted small">+51 987 654 321</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <a asp-action="Index" class="btn btn-outline-gradient">
+                    <i class="bi bi-arrow-left me-1"></i> Volver
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .support-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+</style>

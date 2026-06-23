@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Reportes";
+}
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="bi bi-bar-chart-fill text-primary"></i> Reportes
+        </h1>
+        <p class="text-muted">Analiza el rendimiento de tu inventario</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Reporte 1 -->
+        <div class="col-md-3">
+            <div class="card-modern text-center p-4 fade-in" style="animation-delay: 0.1s;">
+                <div class="stat-icon text-primary mb-3">
+                    <i class="bi bi-box-seam fs-1"></i>
+                </div>
+                <h5 class="fw-bold">Inventario</h5>
+                <p class="text-muted small">Ver stock y valor total</p>
+                <a asp-action="Productos" class="btn btn-gradient btn-sm">
+                    Ver <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Reporte 2 -->
+        <div class="col-md-3">
+            <div class="card-modern text-center p-4 fade-in" style="animation-delay: 0.2s;">
+                <div class="stat-icon text-success mb-3">
+                    <i class="bi bi-cart-check fs-1"></i>
+                </div>
+                <h5 class="fw-bold">Ventas</h5>
+                <p class="text-muted small">Historial de compras</p>
+                <a asp-action="Compras" class="btn btn-gradient btn-sm">
+                    Ver <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Reporte 3 -->
+        <div class="col-md-3">
+            <div class="card-modern text-center p-4 fade-in" style="animation-delay: 0.3s;">
+                <div class="stat-icon text-warning mb-3">
+                    <i class="bi bi-people fs-1"></i>
+                </div>
+                <h5 class="fw-bold">Usuarios</h5>
+                <p class="text-muted small">Actividad de usuarios</p>
+                <a asp-action="Usuarios" class="btn btn-gradient btn-sm">
+                    Ver <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Reporte 4 -->
+        <div class="col-md-3">
+            <div class="card-modern text-center p-4 fade-in" style="animation-delay: 0.4s;">
+                <div class="stat-icon text-danger mb-3">
+                    <i class="bi bi-exclamation-triangle fs-1"></i>
+                </div>
+                <h5 class="fw-bold">Stock Bajo</h5>
+                <p class="text-muted small">Productos con pocas unidades</p>
+                <a asp-action="StockBajo" class="btn btn-gradient btn-sm">
+                    Ver <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

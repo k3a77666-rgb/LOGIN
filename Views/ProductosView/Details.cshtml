@@ -1,0 +1,64 @@
+﻿@model LOGIN.Models.Producto
+
+@{
+    ViewData["Title"] = "Detalles";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-custom">
+                <div class="card-header bg-white border-bottom-0 pt-4">
+                    <div class="text-center">
+                        <i class="bi bi-info-circle-fill fs-1" style="color: #3b82f6;"></i>
+                        <h2 class="h3 mt-2 fw-bold">Detalles del Producto</h2>
+                        <p class="text-muted small">Información completa</p>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="bg-light rounded-3 p-3">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Id)</dt>
+                            <dd class="col-sm-8 text-secondary">#@Html.DisplayFor(model => model.Id)</dd>
+
+                            <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Nombre)</dt>
+                            <dd class="col-sm-8 fw-semibold">@Html.DisplayFor(model => model.Nombre)</dd>
+
+                            <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+                            <dd class="col-sm-8 text-secondary">@Html.DisplayFor(model => model.Descripcion)</dd>
+
+                            <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Cantidad)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.Cantidad == 0)
+                                {
+                                    <span class="badge-stock" style="background: #fee2e2; color: #dc2626;">Sin stock</span>
+                                }
+                                else
+                                {
+                                    <span>@Html.DisplayFor(model => model.Cantidad) unidades</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Precio)</dt>
+                            <dd class="col-sm-8 fs-4 fw-bold" style="color: #667eea;">@Html.DisplayFor(model => model.Precio)</dd>
+
+                            <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.FechaRegistro)</dt>
+                            <dd class="col-sm-8 text-secondary">@Html.DisplayFor(model => model.FechaRegistro)</dd>
+                        </dl>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning rounded-pill px-4">
+                            <i class="bi bi-pencil me-1"></i>Editar
+                        </a>
+                        <a asp-action="Index" class="btn btn-light rounded-pill px-4">
+                            <i class="bi bi-arrow-left me-1"></i>Volver
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

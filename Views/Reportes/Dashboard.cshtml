@@ -1,0 +1,211 @@
+﻿@model List<LOGIN.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var desde = ViewBag.Desde;
+    var hasta = ViewBag.Hasta;
+}
+
+<div class="container-fluid px-4 mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6 fw-bold">
+                <i class="bi bi-graph-up-arrow text-primary"></i> Dashboard
+            </h1>
+            <p class="text-muted">Monitoreo de ingresos y rendimiento del e-commerce en tiempo real.</p>
+        </div>
+        <div>
+            <a asp-action="Compras" class="btn btn-outline-gradient me-2">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtro de fechas -->
+    <div class="card-modern p-3 mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Desde</label>
+                <input type="date" name="desde" class="form-control" value="@ViewBag.DesdeFiltro" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Hasta</label>
+                <input type="date" name="hasta" class="form-control" value="@ViewBag.HastaFiltro" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-gradient w-100">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="text-muted small">
+                    <i class="bi bi-calendar3"></i> @desde - @hasta
+                </span>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Total Ingresos</div>
+                        <div class="stat-number text-success">@ViewBag.TotalIngresos.ToString("C")</div>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                </div>
+                <small class="text-muted">Recaudación acumulada en el rango</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #4299e1;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Órdenes Totales</div>
+                        <div class="stat-number text-primary">+@ViewBag.TotalOrdenes</div>
+                    </div>
+                    <div class="stat-icon text-primary">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                </div>
+                <small class="text-muted">Transacciones aprobadas con éxito</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #ed8936;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Items Vendidos</div>
+                        <div class="stat-number text-warning">@ViewBag.ItemsVendidos</div>
+                    </div>
+                    <div class="stat-icon text-warning">
+                        <i class="bi bi-box"></i>
+                    </div>
+                </div>
+                <small class="text-muted">Unidades vendidas en el período</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #48bb78;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Confirmadas</div>
+                        <div class="stat-number text-success">@ViewBag.OrdenesConfirmadas</div>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+                <small class="text-muted">Órdenes confirmadas</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos: Top productos y Órdenes recientes -->
+    <div class="row g-4">
+        <!-- Top 5 Productos -->
+        <div class="col-md-6">
+            <div class="card-modern p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-trophy text-warning"></i> Más Vendidos
+                </h5>
+                <p class="text-muted small">Top 5 productos con mayor demanda.</p>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-center">Cant.</th>
+                                <th class="text-end">Recaudado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.TopProductos != null && ViewBag.TopProductos.Count > 0)
+                            {
+                                foreach (var item in ViewBag.TopProductos)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@item.Producto</td>
+                                        <td class="text-center">@item.Cantidad u.</td>
+                                        <td class="text-end fw-bold text-success">@item.Recaudado.ToString("C")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">Sin datos en el período</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Órdenes Recientes -->
+        <div class="col-md-6">
+            <div class="card-modern p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-clock-history text-info"></i> Órdenes Recientes
+                </h5>
+                <p class="text-muted small">Historial detallado de transacciones del período.</p>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pedido in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">#@pedido.Id</td>
+                                    <td>@pedido.FechaPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-center">
+                                        @{
+                                            var estadoClass = pedido.Estado switch
+                                            {
+                                                EstadoPedido.Confirmado => "badge-success",
+                                                EstadoPedido.Pendiente => "badge-warning",
+                                                EstadoPedido.Enviado => "badge-info",
+                                                EstadoPedido.Entregado => "badge-success",
+                                                EstadoPedido.Cancelado => "badge-danger",
+                                                _ => "badge-secondary"
+                                            };
+                                        }
+                                        <span class="badge-modern @estadoClass">@pedido.Estado</span>
+                                    </td>
+                                    <td class="text-end fw-bold">@pedido.Total.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .table-light th {
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+    </style>
+}

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<LOGIN.Models.Producto>
+
+@{
+    ViewData["Title"] = "Reporte de Productos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">
+                <i class="bi bi-box-seam text-primary"></i> Inventario
+            </h2>
+            <p class="text-muted">Resumen completo de productos</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-gradient">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Total Productos</div>
+                        <div class="stat-number">@ViewBag.TotalProductos</div>
+                    </div>
+                    <div class="stat-icon text-primary">
+                        <i class="bi bi-box"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="border-left-color: #48bb78;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Valor Total</div>
+                        <div class="stat-number">@ViewBag.ValorTotalInventario.ToString("C")</div>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="border-left-color: #ed8936;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Stock Bajo</div>
+                        <div class="stat-number text-warning">@ViewBag.ProductosBajoStock</div>
+                    </div>
+                    <div class="stat-icon text-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card-modern p-4">
+        <div class="table-responsive">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Stock</th>
+                        <th class="text-end">Precio</th>
+                        <th class="text-end">Valor Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-secondary">#@item.Id</td>
+                            <td class="fw-semibold">@item.Nombre</td>
+                            <td class="text-muted small">@item.Descripcion</td>
+                            <td class="text-center">
+                                @if (item.Cantidad == 0)
+                                {
+                                    <span class="badge-modern badge-danger">Sin stock</span>
+                                }
+                                else if (item.Cantidad < 5)
+                                {
+                                    <span class="badge-modern badge-warning">@item.Cantidad uds</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-modern badge-success">@item.Cantidad uds</span>
+                                }
+                            </td>
+                            <td class="text-end fw-bold">@item.Precio.ToString("C")</td>
+                            <td class="text-end fw-bold text-primary">
+                                @((item.Cantidad * item.Precio).ToString("C"))
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

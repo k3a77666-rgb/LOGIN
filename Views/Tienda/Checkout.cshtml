@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-modern">
+                <div class="card-header bg-white border-bottom-0 pt-4">
+                    <h2 class="h3 fw-bold">
+                        <i class="bi bi-credit-card text-success"></i> Finalizar Compra
+                    </h2>
+                    <p class="text-muted">Completa los datos para tu pedido</p>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="ConfirmarPedido" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-geo-alt"></i> Dirección de envío *
+                            </label>
+                            <input type="text" name="direccion" class="form-control input-modern"
+                                   placeholder="Calle, número, ciudad, código postal" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-wallet2"></i> Método de pago *
+                            </label>
+                            <select name="metodoPago" class="form-select input-modern" required>
+                                <option value="">Selecciona un método</option>
+                                <option value="Tarjeta Crédito/Débito">💳 Tarjeta Crédito/Débito</option>
+                                <option value="Transferencia Bancaria">🏦 Transferencia Bancaria</option>
+                                <option value="Pago contra entrega">🚚 Pago contra entrega</option>
+                                <option value="Yape/Plin">📱 Yape / Plin</option>
+                            </select>
+                        </div>
+
+                        <div class="alert alert-info rounded-3 mt-3">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Total a pagar:</strong> <span class="fs-4 fw-bold">@ViewBag.Total.ToString("C")</span>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end mt-4">
+                            <a asp-action="Carrito" class="btn btn-light rounded-pill px-4">
+                                <i class="bi bi-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-gradient rounded-pill px-4">
+                                <i class="bi bi-check-circle"></i> Confirmar Pedido
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

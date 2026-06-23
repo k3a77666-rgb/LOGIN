@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "Política de Privacidad";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-modern p-5">
+
+                <div class="text-center mb-4">
+                    <div class="privacy-icon mb-3">
+                        <i class="bi bi-shield-lock fs-1 text-primary"></i>
+                    </div>
+                    <h1 class="display-6 fw-bold">Política de Privacidad</h1>
+                    <p class="text-muted">
+                        Información sobre el tratamiento, seguridad y protección de tus datos personales.
+                    </p>
+                </div>
+
+                <hr />
+
+                <div class="privacy-content">
+                    <div class="privacy-section">
+                        <h5 class="fw-bold">
+                            <i class="bi bi-shield-check text-success me-2"></i>
+                            Protección garantizada
+                        </h5>
+                        <p class="text-muted">
+                            Esta plataforma implementa protocolos criptográficos avanzados para resguardar tu identidad.
+                            No compartimos tu información con terceros bajo ningún concepto comercial.
+                        </p>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h5 class="fw-bold">
+                            <i class="bi bi-database-lock text-primary me-2"></i>
+                            Almacenamiento seguro
+                        </h5>
+                        <p class="text-muted">
+                            Toda la información transaccional y de registro se procesa de forma cifrada en bases de datos aisladas,
+                            asegurando el cumplimiento estricto de las normativas de privacidad vigentes.
+                        </p>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h5 class="fw-bold">
+                            <i class="bi bi-person-badge text-info me-2"></i>
+                            Tus derechos
+                        </h5>
+                        <p class="text-muted">
+                            Tienes derecho a acceder, rectificar, cancelar u oponerte al tratamiento de tus datos personales
+                            en cualquier momento, enviando una solicitud a nuestro equipo de soporte.
+                        </p>
+                    </div>
+
+                    <div class="privacy-section">
+                        <h5 class="fw-bold">
+                            <i class="bi bi-clock-history text-warning me-2"></i>
+                            Retención de datos
+                        </h5>
+                        <p class="text-muted">
+                            Conservamos tus datos únicamente durante el tiempo necesario para cumplir con los fines descritos,
+                            a menos que la ley exija un período de retención más prolongado.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="text-center">
+                    <p class="text-muted small">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        Última actualización: @DateTime.Now.ToString("dd/MM/yyyy")
+                    </p>
+                    <a asp-action="Index" class="btn btn-gradient">
+                        <i class="bi bi-arrow-left me-1"></i> Volver al inicio
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+    .privacy-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .privacy-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.25rem;
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+        .privacy-section:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+
+        .privacy-section h5 {
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .privacy-section p {
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+</style>

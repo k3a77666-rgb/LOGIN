@@ -1,0 +1,117 @@
+﻿@model IEnumerable<LOGIN.Models.Producto>
+
+@{
+    ViewData["Title"] = "Tienda";
+}
+
+<div class="container mt-4">
+    <!-- Header con carrito -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-shop"></i> Nuestros Productos
+            </h1>
+            <p class="text-muted">Lo mejor para tu hogar</p>
+        </div>
+        <a asp-action="Carrito" class="btn btn-gradient position-relative">
+            <i class="bi bi-cart3 fs-5"></i>
+            @if (ViewBag.CarritoCount > 0)
+            {
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    @ViewBag.CarritoCount
+                </span>
+            }
+            <span class="ms-2">Carrito</span>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var producto in Model)
+        {
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card producto-card h-100">
+                    <div class="card-img-top text-center pt-4 bg-light">
+                        <i class="bi bi-box-seam" style="font-size: 5rem; color: #667eea;"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">@producto.Nombre</h5>
+                        <p class="card-text text-muted small">
+                            @(producto.Descripcion?.Length > 60 ? producto.Descripcion.Substring(0, 60) + "..." : producto.Descripcion ?? "Sin descripción")
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fs-4 fw-bold text-primary">@producto.Precio.ToString("C")</span>
+                            @if (producto.Cantidad > 0)
+                            {
+                                <button class="btn btn-sm btn-gradient add-to-cart" data-id="@producto.Id">
+                                    <i class="bi bi-cart-plus"></i> Agregar
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-secondary" disabled>
+                                    <i class="bi bi-x-circle"></i> Agotado
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .producto-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+        overflow: hidden;
+    }
+    .producto-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 2rem;
+        padding: 0.5rem 1.25rem;
+        transition: all 0.3s;
+    }
+    .btn-gradient:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.add-to-cart').click(function() {
+            var btn = $(this);
+            var productoId = btn.data('id');
+            
+            $.post('/Tienda/AgregarAlCarrito', { productoId: productoId, cantidad: 1 })
+                .done(function(response) {
+                    if (response.success) {
+                        // Actualizar contador del carrito
+                        $('.badge.bg-danger').remove();
+                        if (response.count > 0) {
+                            $('.btn-gradient.position-relative').append(
+                                '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">' + response.count + '</span>'
+                            );
+                        }
+                        // Mostrar notificación
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                })
+                .fail(function() {
+                    alert('Error al agregar al carrito');
+                });
+        });
+    });
+</script>
