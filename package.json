@@ -1,0 +1,9 @@
+{
+  "name": "mi-inventario",
+  "version": "1.0.0",
+  "description": "Sistema de inventario",
+  "scripts": {
+    "start": "dotnet LOGIN.dll"
+  },
+  "dependencies": {}
+}
