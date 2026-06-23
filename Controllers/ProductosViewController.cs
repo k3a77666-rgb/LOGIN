@@ -85,7 +85,7 @@ namespace LOGIN.Controllers
 
             if (ModelState.IsValid)
             {
-                producto.FechaRegistro = DateTime.Now;
+                producto.FechaRegistro = DateTime.UtcNow;
                 _context.Add(producto);
                 await _context.SaveChangesAsync();
                 TempData["Mensaje"] = "✅ Producto creado exitosamente";

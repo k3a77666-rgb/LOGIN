@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LOGIN.Models
 {
-    [Table("carritoItems")]
+    [Table("carritoitems")]
     public class CarritoItem
     {
         [Key]
@@ -19,9 +19,9 @@ namespace LOGIN.Models
         [Range(1, 999)]
         public int Cantidad { get; set; } = 1;
 
-        public DateTime FechaAgregado { get; set; } = DateTime.Now;
+        // 🔥 CAMBIO: UtcNow
+        public DateTime FechaAgregado { get; set; } = DateTime.UtcNow;
 
-        // Relaciones (virtuales)
         [ForeignKey("UsuarioId")]
         public virtual Usuario? Usuario { get; set; }
 

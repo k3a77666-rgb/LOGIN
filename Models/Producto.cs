@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LOGIN.Models  // ← Cambiado de LOGINModels a LOGIN.Models
+namespace LOGIN.Models
 {
     [Table("productos")]
     public class Producto
@@ -24,6 +24,6 @@ namespace LOGIN.Models  // ← Cambiado de LOGINModels a LOGIN.Models
         [DataType(DataType.Currency)]
         public decimal Precio { get; set; }
 
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+        public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
     }
 }

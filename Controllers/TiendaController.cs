@@ -197,7 +197,7 @@ namespace LOGIN.Controllers
                 Total = total,
                 DireccionEnvio = direccion,
                 MetodoPago = metodoPago,
-                NumeroReferencia = "REF-" + DateTime.Now.Ticks.ToString().Substring(0, 8),
+                NumeroReferencia = "REF-" + DateTime.UtcNow.Ticks.ToString().Substring(0, 8),
                 Estado = EstadoPedido.Confirmado
             };
 

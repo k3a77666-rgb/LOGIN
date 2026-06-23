@@ -21,13 +21,13 @@ namespace LOGIN.Models
         [Required]
         public int UsuarioId { get; set; }
 
-        public DateTime FechaPedido { get; set; } = DateTime.Now;
+        // 🔥 CAMBIO: UtcNow
+        public DateTime FechaPedido { get; set; } = DateTime.UtcNow;
 
         public decimal Total { get; set; }
 
         public EstadoPedido Estado { get; set; } = EstadoPedido.Pendiente;
 
-        // Datos de envío
         [StringLength(200)]
         public string? DireccionEnvio { get; set; }
 

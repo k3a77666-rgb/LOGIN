@@ -8,8 +8,11 @@
 
 	<ItemGroup>
 		<!-- Entity Framework Core 10 (compatible con .NET 10) -->
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.4" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 
 		<!-- PostgreSQL para Entity Framework Core 10 -->
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />

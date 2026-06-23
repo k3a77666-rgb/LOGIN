@@ -3,32 +3,35 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LOGIN.Models
 {
-    [Table("usuarios")]  // ← CAMBIADO: minúscula
+    [Table("usuarios")]
     public class Usuario
     {
         [Key]
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
+        [Required(ErrorMessage = "El nombre es requerido")]
+        [Display(Name = "Nombre")]
         public string Nombre { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
-        [StringLength(100)]
+        [Required(ErrorMessage = "El email es requerido")]
+        [EmailAddress(ErrorMessage = "Email no válido")]
+        [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(100)]
+        [Required(ErrorMessage = "La contraseña es requerida")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Contraseña")]
         public string Password { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "La edad es requerida")]
+        [Range(1, 120)]
+        [Display(Name = "Edad")]
         public int Edad { get; set; }
 
-        [Required]
-        [StringLength(100)]
+        [Required(ErrorMessage = "La ciudad es requerida")]
+        [Display(Name = "Ciudad")]
         public string Ciudad { get; set; } = string.Empty;
 
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+        public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
     }
 }

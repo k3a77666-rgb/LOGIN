@@ -19,9 +19,9 @@ namespace LOGIN.Controllers
         {
             // Si no hay fechas, usar el mes actual
             if (!desde.HasValue)
-                desde = DateTime.Now.AddDays(-30);
+                desde = DateTime.UtcNow.AddDays(-30);
             if (!hasta.HasValue)
-                hasta = DateTime.Now;
+                hasta = DateTime.UtcNow;
 
             ViewBag.Desde = desde.Value.ToString("dd/MM/yyyy");
             ViewBag.Hasta = hasta.Value.ToString("dd/MM/yyyy");
