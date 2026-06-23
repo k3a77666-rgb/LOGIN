@@ -9,8 +9,8 @@ RUN dotnet restore
 COPY . .
 RUN dotnet publish -c Release -o /app/publish
 
-# Imagen final
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Imagen final CON .NET 10 (no 8)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
