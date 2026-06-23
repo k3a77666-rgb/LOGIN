@@ -37,4 +37,17 @@ app.MapControllerRoute(
 
 app.MapControllers();
 
+app.MapGet("/test-db", async (ApplicationDbContext db) =>
+{
+    try
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+        return Results.Ok(new { connected = canConnect, message = canConnect ? "Conexión exitosa a la base de datos" : "No se pudo conectar" });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message, stack = ex.StackTrace });
+    }
+});
+
 app.Run();
