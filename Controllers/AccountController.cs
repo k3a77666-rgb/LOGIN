@@ -14,6 +14,9 @@ namespace LOGIN.Controllers
             _context = context;
         }
 
+        // ============================================
+        // GET: LOGIN
+        // ============================================
         [HttpGet]
         public IActionResult Login()
         {
@@ -24,6 +27,9 @@ namespace LOGIN.Controllers
             return View();
         }
 
+        // ============================================
+        // POST: LOGIN
+        // ============================================
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -37,6 +43,9 @@ namespace LOGIN.Controllers
                     HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
                     HttpContext.Session.SetString("UsuarioNombre", usuario.Nombre ?? "");
                     HttpContext.Session.SetString("UsuarioEmail", usuario.Email ?? "");
+
+                    // 🔥 MENSAJE DE BIENVENIDA
+                    TempData["Mensaje"] = $"¡Bienvenido {usuario.Nombre}!";
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -47,17 +56,24 @@ namespace LOGIN.Controllers
             return View(model);
         }
 
+        // ============================================
+        // GET: REGISTER
+        // ============================================
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
+        // ============================================
+        // POST: REGISTER
+        // ============================================
         [HttpPost]
         public async Task<IActionResult> Register(Usuario usuario)
         {
             if (ModelState.IsValid)
             {
+                // Verificar si el email ya existe
                 var existe = await _context.Usuarios.AnyAsync(u => u.Email == usuario.Email);
                 if (existe)
                 {
@@ -65,19 +81,25 @@ namespace LOGIN.Controllers
                     return View(usuario);
                 }
 
+                // Asignar fecha de registro (UTC) y guardar
                 usuario.FechaRegistro = DateTime.UtcNow;
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync();
 
+                // 🔥 MENSAJE DE ÉXITO
                 TempData["Mensaje"] = "Registro exitoso. ¡Inicia sesión!";
                 return RedirectToAction("Login");
             }
             return View(usuario);
         }
 
+        // ============================================
+        // LOGOUT
+        // ============================================
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            TempData["Mensaje"] = "Sesión cerrada correctamente.";
             return RedirectToAction("Login");
         }
     }
