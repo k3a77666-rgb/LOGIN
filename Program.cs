@@ -1,31 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using LOGIN.Data;
-using System.Globalization;
-using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================
-// 🔥 CONFIGURACIÓN DE CULTURA (Bs)
-// ============================================
-var cultureInfo = new CultureInfo("es-BO");
-cultureInfo.NumberFormat.CurrencySymbol = "Bs ";
-cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
-cultureInfo.NumberFormat.CurrencyGroupSeparator = ",";
-
-CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
-CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
-
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    options.DefaultRequestCulture = new RequestCulture(cultureInfo);
-    options.SupportedCultures = new List<CultureInfo> { cultureInfo };
-    options.SupportedUICultures = new List<CultureInfo> { cultureInfo };
-});
-
-// ============================================
-// SERVICIOS
-// ============================================
+// Agregar controladores MVC y API
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
@@ -44,9 +22,6 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// ============================================
-// PIPELINE
-// ============================================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -56,13 +31,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-// 🔥 AGREGAR ESTO PARA USAR LA CULTURA
-app.UseRequestLocalization();
-
 app.UseSession();
 app.UseAuthorization();
 
+// Mapeo de rutas
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
