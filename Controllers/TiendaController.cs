@@ -228,10 +228,22 @@ namespace LOGIN.Controllers
             if (!UsuarioLogueado())
                 return RedirectToAction("Login", "Account");
 
-            var carritoItems = await _context.CarritoItems
-                .Include(c => c.Producto)
-                .Where(c => c.UsuarioId == GetUsuarioId())
-                .ToListAsync();
+            var usuarioId = GetUsuarioId();
+
+            // 🔥 USAR CACHÉ PARA EL CHECKOUT
+            var carritoKey = $"carrito_items_{usuarioId}";
+            List<CarritoItem> carritoItems;
+
+            if (!_cache.TryGetValue(carritoKey, out carritoItems))
+            {
+                carritoItems = await _context.CarritoItems
+                    .Include(c => c.Producto)
+                    .Where(c => c.UsuarioId == usuarioId)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                _cache.Set(carritoKey, carritoItems, TimeSpan.FromSeconds(30));
+            }
 
             if (!carritoItems.Any())
                 return RedirectToAction("Carrito");
@@ -240,7 +252,7 @@ namespace LOGIN.Controllers
             return View();
         }
 
-        // POST: Confirmar pedido
+        // POST: Confirmar pedido (OPTIMIZADO)
         [HttpPost]
         public async Task<IActionResult> ConfirmarPedido(string direccion, string metodoPago)
         {
@@ -248,24 +260,34 @@ namespace LOGIN.Controllers
                 return RedirectToAction("Login", "Account");
 
             var usuarioId = GetUsuarioId();
+
+            // 🔥 OPTIMIZACIÓN: Obtener carrito con una sola consulta
             var carritoItems = await _context.CarritoItems
                 .Include(c => c.Producto)
                 .Where(c => c.UsuarioId == usuarioId)
+                .AsNoTracking()
                 .ToListAsync();
 
             if (!carritoItems.Any())
+            {
+                TempData["Error"] = "Tu carrito está vacío";
                 return RedirectToAction("Carrito");
+            }
 
+            // Verificar stock
             foreach (var item in carritoItems)
             {
-                if (item.Producto!.Cantidad < item.Cantidad)
+                if (item.Producto == null || item.Producto.Cantidad < item.Cantidad)
                 {
-                    TempData["Error"] = $"Stock insuficiente para {item.Producto.Nombre}";
+                    TempData["Error"] = $"Stock insuficiente para {item.Producto?.Nombre ?? "producto"}";
                     return RedirectToAction("Carrito");
                 }
             }
 
+            // Calcular total
             var total = carritoItems.Sum(c => c.Cantidad * c.Producto!.Precio);
+
+            // Crear pedido
             var pedido = new Pedido
             {
                 UsuarioId = usuarioId,
@@ -276,33 +298,57 @@ namespace LOGIN.Controllers
                 Estado = EstadoPedido.Confirmado
             };
 
-            _context.Pedidos.Add(pedido);
-            await _context.SaveChangesAsync();
+            // 🔥 USAR TRANSACCIÓN PARA CONSISTENCIA
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (var item in carritoItems)
+            try
             {
-                var detalle = new PedidoDetalle
+                _context.Pedidos.Add(pedido);
+                await _context.SaveChangesAsync();
+
+                // Crear detalles y actualizar stock
+                foreach (var item in carritoItems)
                 {
-                    PedidoId = pedido.Id,
-                    ProductoId = item.ProductoId,
-                    Cantidad = item.Cantidad,
-                    PrecioUnitario = item.Producto!.Precio
-                };
-                _context.PedidoDetalles.Add(detalle);
+                    var detalle = new PedidoDetalle
+                    {
+                        PedidoId = pedido.Id,
+                        ProductoId = item.ProductoId,
+                        Cantidad = item.Cantidad,
+                        PrecioUnitario = item.Producto!.Precio
+                    };
+                    _context.PedidoDetalles.Add(detalle);
 
-                item.Producto.Cantidad -= item.Cantidad;
-                _context.Entry(item.Producto).State = EntityState.Modified;
+                    // Actualizar stock
+                    var producto = await _context.Productos.FindAsync(item.ProductoId);
+                    if (producto != null)
+                    {
+                        producto.Cantidad -= item.Cantidad;
+                        _context.Entry(producto).State = EntityState.Modified;
+                    }
+                }
+
+                // Limpiar carrito
+                _context.CarritoItems.RemoveRange(
+                    _context.CarritoItems.Where(c => c.UsuarioId == usuarioId)
+                );
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // 🔥 LIMPIAR CACHÉ
+                _cache.Remove($"carrito_items_{usuarioId}");
+                _cache.Remove($"carrito_count_{usuarioId}");
+
+                TempData["Mensaje"] = "¡Pedido realizado con éxito!";
+                return RedirectToAction("MisCompras");
             }
-
-            _context.CarritoItems.RemoveRange(carritoItems);
-            await _context.SaveChangesAsync();
-
-            // 🔥 LIMPIAR CACHÉ
-            _cache.Remove($"carrito_items_{usuarioId}");
-            _cache.Remove($"carrito_count_{usuarioId}");
-
-            TempData["Mensaje"] = "¡Pedido realizado con éxito!";
-            return RedirectToAction("MisCompras");
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine($"Error en ConfirmarPedido: {ex.Message}");
+                TempData["Error"] = "Error al procesar el pedido. Intenta de nuevo.";
+                return RedirectToAction("Carrito");
+            }
         }
 
         // GET: Mis Compras

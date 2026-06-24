@@ -1,12 +1,21 @@
-using Microsoft.EntityFrameworkCore;
 using LOGIN.Data;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 🔥 CONFIGURAR PROTECCIÓN DE DATOS
+builder.Services.AddDataProtection()
+    .SetApplicationName("LOGIN")
+    .PersistKeysToFileSystem(new DirectoryInfo("/tmp/keys"));
 
 // Agregar controladores MVC y API
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
+
+// 🔥 AGREGAR CACHÉ EN MEMORIA
 builder.Services.AddMemoryCache();
+
 // Configurar PostgreSQL (Supabase)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -34,7 +43,6 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
 
-// Mapeo de rutas
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
