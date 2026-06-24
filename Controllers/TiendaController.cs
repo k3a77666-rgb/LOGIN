@@ -252,7 +252,7 @@ namespace LOGIN.Controllers
             return View();
         }
 
-        // POST: Confirmar pedido (OPTIMIZADO)
+        // POST: Confirmar pedido (SIN TRANSACCIÓN)
         [HttpPost]
         public async Task<IActionResult> ConfirmarPedido(string direccion, string metodoPago)
         {
@@ -261,11 +261,10 @@ namespace LOGIN.Controllers
 
             var usuarioId = GetUsuarioId();
 
-            // 🔥 OPTIMIZACIÓN: Obtener carrito con una sola consulta
+            // Obtener carrito
             var carritoItems = await _context.CarritoItems
                 .Include(c => c.Producto)
                 .Where(c => c.UsuarioId == usuarioId)
-                .AsNoTracking()
                 .ToListAsync();
 
             if (!carritoItems.Any())
@@ -298,11 +297,9 @@ namespace LOGIN.Controllers
                 Estado = EstadoPedido.Confirmado
             };
 
-            // 🔥 USAR TRANSACCIÓN PARA CONSISTENCIA
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
             try
             {
+                // Guardar pedido
                 _context.Pedidos.Add(pedido);
                 await _context.SaveChangesAsync();
 
@@ -319,23 +316,18 @@ namespace LOGIN.Controllers
                     _context.PedidoDetalles.Add(detalle);
 
                     // Actualizar stock
-                    var producto = await _context.Productos.FindAsync(item.ProductoId);
-                    if (producto != null)
+                    if (item.Producto != null)
                     {
-                        producto.Cantidad -= item.Cantidad;
-                        _context.Entry(producto).State = EntityState.Modified;
+                        item.Producto.Cantidad -= item.Cantidad;
+                        _context.Entry(item.Producto).State = EntityState.Modified;
                     }
                 }
 
                 // Limpiar carrito
-                _context.CarritoItems.RemoveRange(
-                    _context.CarritoItems.Where(c => c.UsuarioId == usuarioId)
-                );
-
+                _context.CarritoItems.RemoveRange(carritoItems);
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
 
-                // 🔥 LIMPIAR CACHÉ
+                // Limpiar caché
                 _cache.Remove($"carrito_items_{usuarioId}");
                 _cache.Remove($"carrito_count_{usuarioId}");
 
@@ -344,7 +336,6 @@ namespace LOGIN.Controllers
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 Console.WriteLine($"Error en ConfirmarPedido: {ex.Message}");
                 TempData["Error"] = "Error al procesar el pedido. Intenta de nuevo.";
                 return RedirectToAction("Carrito");
