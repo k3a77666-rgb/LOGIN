@@ -68,6 +68,35 @@
                 </div>
             }
         </div>
+
+        
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (ViewBag.Page > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.Page - 1 })">« Anterior</a>
+                        </li>
+                    }
+
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.Page < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.Page + 1 })">Siguiente »</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
     }
 </div>
 
