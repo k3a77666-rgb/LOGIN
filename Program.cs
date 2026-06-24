@@ -1,27 +1,40 @@
 using Microsoft.EntityFrameworkCore;
 using LOGIN.Data;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
+// ============================================
+// 🔥 CONFIGURACIÓN DE CULTURA (Bs)
+// ============================================
+var cultureInfo = new CultureInfo("es-BO");
+cultureInfo.NumberFormat.CurrencySymbol = "Bs ";
+cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+cultureInfo.NumberFormat.CurrencyGroupSeparator = ",";
+
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture(cultureInfo);
+    options.SupportedCultures = new List<CultureInfo> { cultureInfo };
+    options.SupportedUICultures = new List<CultureInfo> { cultureInfo };
+});
+
+// ============================================
+// SERVICIOS
+// ============================================
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
-// PostgreSQL (Supabase)
+// Configurar PostgreSQL (Supabase)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
-        {
-            npgsqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 10,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorCodesToAdd: null);
-        }));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Sesiones
+// Configurar sesión
 builder.Services.AddDistributedMemoryCache();
-
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -31,28 +44,9 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Verificar conexión al arrancar
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        Console.WriteLine("=== PROBANDO CONEXION A SUPABASE ===");
-
-        db.Database.OpenConnection();
-
-        Console.WriteLine("=== CONEXION EXITOSA ===");
-
-        db.Database.CloseConnection();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("=== ERROR DE CONEXION ===");
-        Console.WriteLine(ex.ToString());
-    }
-}
-
+// ============================================
+// PIPELINE
+// ============================================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -61,11 +55,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-app.UseSession();
+// 🔥 AGREGAR ESTO PARA USAR LA CULTURA
+app.UseRequestLocalization();
 
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
