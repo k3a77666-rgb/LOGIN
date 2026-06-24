@@ -25,18 +25,29 @@ namespace LOGIN.Controllers
         }
 
         // GET: Tienda (vitrina de productos)
+        // GET: Tienda (vitrina de productos)
         public async Task<IActionResult> Index()
         {
             if (!UsuarioLogueado())
                 return RedirectToAction("Login", "Account");
 
-            var productos = await _context.Productos.ToListAsync();
-            var carritoCount = await _context.CarritoItems
-                .Where(c => c.UsuarioId == GetUsuarioId())
-                .SumAsync(c => c.Cantidad);
+            try
+            {
+                var productos = await _context.Productos.ToListAsync();
+                var carritoCount = await _context.CarritoItems
+                    .Where(c => c.UsuarioId == GetUsuarioId())
+                    .SumAsync(c => c.Cantidad);
 
-            ViewBag.CarritoCount = carritoCount;
-            return View(productos);
+                ViewBag.CarritoCount = carritoCount;
+                return View(productos);
+            }
+            catch (Exception ex)
+            {
+                // Log del error
+                Console.WriteLine($"Error en Tienda/Index: {ex.Message}");
+                TempData["Error"] = "Error al cargar los productos. Intenta de nuevo.";
+                return RedirectToAction("Carrito");
+            }
         }
 
         // POST: Agregar al carrito
