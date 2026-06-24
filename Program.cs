@@ -3,16 +3,25 @@ using LOGIN.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Agregar controladores MVC y API
+// MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
-// Configurar PostgreSQL (Supabase) - SIN INTERCEPTOR
+// PostgreSQL (Supabase)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions =>
+        {
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorCodesToAdd: null);
+        }));
 
-// Configurar sesión
+// Sesiones
 builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -22,6 +31,28 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// Verificar conexión al arrancar
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        Console.WriteLine("=== PROBANDO CONEXION A SUPABASE ===");
+
+        db.Database.OpenConnection();
+
+        Console.WriteLine("=== CONEXION EXITOSA ===");
+
+        db.Database.CloseConnection();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("=== ERROR DE CONEXION ===");
+        Console.WriteLine(ex.ToString());
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -30,11 +61,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseSession();
+
 app.UseAuthorization();
 
-// Mapeo de rutas
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
