@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LOGIN.Models
 {
-    [Table("PedidoDetalles")]
+    [Table("pedidodetalles")]
     public class PedidoDetalle
     {
         [Key]
