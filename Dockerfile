@@ -17,6 +17,13 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+# 🔥 FORZAR IPv4 DENTRO DEL CONTENEDOR
+ENV DOTNET_SYSTEM_NET_IPV6_DISABLE=1
+ENV DOTNET_SYSTEM_NET_IPV4_ENABLED=1
+
+# 🔥 FORZAR RESOLUCIÓN DE DNS
+RUN echo "options single-request-reopen" >> /etc/resolv.conf
+
 # Copia los archivos publicados desde la etapa de compilación
 COPY --from=build /app/publish .
 
