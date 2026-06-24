@@ -2,16 +2,19 @@
 using Microsoft.EntityFrameworkCore;
 using LOGIN.Data;
 using LOGIN.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LOGIN.Controllers
 {
     public class TiendaController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMemoryCache _cache;
 
-        public TiendaController(ApplicationDbContext context)
+        public TiendaController(ApplicationDbContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         private bool UsuarioLogueado()
@@ -24,26 +27,60 @@ namespace LOGIN.Controllers
             return int.Parse(HttpContext.Session.GetString("UsuarioId") ?? "0");
         }
 
-        // GET: Tienda (vitrina de productos)
-        // GET: Tienda (vitrina de productos)
-        public async Task<IActionResult> Index()
+        // GET: Tienda (vitrina de productos con paginación y caché)
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
         {
             if (!UsuarioLogueado())
                 return RedirectToAction("Login", "Account");
 
             try
             {
-                var productos = await _context.Productos.ToListAsync();
-                var carritoCount = await _context.CarritoItems
-                    .Where(c => c.UsuarioId == GetUsuarioId())
-                    .SumAsync(c => c.Cantidad);
+                // 🔥 CACHÉ PARA PRODUCTOS (5 minutos)
+                var cacheKey = "productos_lista";
+                List<Producto> productos;
+                int totalProductos;
+
+                if (!_cache.TryGetValue(cacheKey, out productos))
+                {
+                    productos = await _context.Productos
+                        .AsNoTracking()
+                        .OrderBy(p => p.Nombre)
+                        .ToListAsync();
+
+                    _cache.Set(cacheKey, productos, TimeSpan.FromMinutes(5));
+                }
+
+                totalProductos = productos.Count;
+
+                // Paginación manual
+                var productosPaginados = productos
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                // 🔥 CACHÉ PARA CARRITO (30 segundos)
+                var carritoCountKey = $"carrito_count_{GetUsuarioId()}";
+                int carritoCount;
+
+                if (!_cache.TryGetValue(carritoCountKey, out carritoCount))
+                {
+                    carritoCount = await _context.CarritoItems
+                        .Where(c => c.UsuarioId == GetUsuarioId())
+                        .SumAsync(c => c.Cantidad);
+
+                    _cache.Set(carritoCountKey, carritoCount, TimeSpan.FromSeconds(30));
+                }
 
                 ViewBag.CarritoCount = carritoCount;
-                return View(productos);
+                ViewBag.TotalProductos = totalProductos;
+                ViewBag.Page = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalPages = (int)Math.Ceiling((double)totalProductos / pageSize);
+
+                return View(productosPaginados);
             }
             catch (Exception ex)
             {
-                // Log del error
                 Console.WriteLine($"Error en Tienda/Index: {ex.Message}");
                 TempData["Error"] = "Error al cargar los productos. Intenta de nuevo.";
                 return RedirectToAction("Carrito");
@@ -86,6 +123,9 @@ namespace LOGIN.Controllers
 
             await _context.SaveChangesAsync();
 
+            // 🔥 LIMPIAR CACHÉ DEL CARRITO
+            _cache.Remove($"carrito_count_{usuarioId}");
+
             var totalItems = await _context.CarritoItems
                 .Where(c => c.UsuarioId == usuarioId)
                 .SumAsync(c => c.Cantidad);
@@ -99,15 +139,36 @@ namespace LOGIN.Controllers
             if (!UsuarioLogueado())
                 return RedirectToAction("Login", "Account");
 
-            var carritoItems = await _context.CarritoItems
-                .Include(c => c.Producto)
-                .Where(c => c.UsuarioId == GetUsuarioId())
-                .ToListAsync();
+            try
+            {
+                var usuarioId = GetUsuarioId();
 
-            var total = carritoItems.Sum(c => c.Cantidad * c.Producto!.Precio);
-            ViewBag.Total = total;
+                // 🔥 CACHÉ PARA EL CARRITO (30 segundos)
+                var carritoKey = $"carrito_items_{usuarioId}";
+                List<CarritoItem> carritoItems;
 
-            return View(carritoItems);
+                if (!_cache.TryGetValue(carritoKey, out carritoItems))
+                {
+                    carritoItems = await _context.CarritoItems
+                        .Include(c => c.Producto)
+                        .Where(c => c.UsuarioId == usuarioId)
+                        .AsNoTracking()
+                        .ToListAsync();
+
+                    _cache.Set(carritoKey, carritoItems, TimeSpan.FromSeconds(30));
+                }
+
+                var total = carritoItems.Sum(c => c.Cantidad * c.Producto!.Precio);
+                ViewBag.Total = total;
+
+                return View(carritoItems);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en Tienda/Carrito: {ex.Message}");
+                TempData["Error"] = "Error al cargar el carrito. Intenta de nuevo.";
+                return RedirectToAction("Index");
+            }
         }
 
         // POST: Actualizar cantidad
@@ -117,9 +178,10 @@ namespace LOGIN.Controllers
             if (!UsuarioLogueado())
                 return Json(new { success = false });
 
+            var usuarioId = GetUsuarioId();
             var item = await _context.CarritoItems
                 .Include(c => c.Producto)
-                .FirstOrDefaultAsync(c => c.Id == itemId && c.UsuarioId == GetUsuarioId());
+                .FirstOrDefaultAsync(c => c.Id == itemId && c.UsuarioId == usuarioId);
 
             if (item == null)
                 return Json(new { success = false });
@@ -138,9 +200,13 @@ namespace LOGIN.Controllers
 
             await _context.SaveChangesAsync();
 
+            // 🔥 LIMPIAR CACHÉ
+            _cache.Remove($"carrito_items_{usuarioId}");
+            _cache.Remove($"carrito_count_{usuarioId}");
+
             var carritoItems = await _context.CarritoItems
                 .Include(c => c.Producto)
-                .Where(c => c.UsuarioId == GetUsuarioId())
+                .Where(c => c.UsuarioId == usuarioId)
                 .ToListAsync();
 
             var total = carritoItems.Sum(c => c.Cantidad * c.Producto!.Precio);
@@ -190,7 +256,6 @@ namespace LOGIN.Controllers
             if (!carritoItems.Any())
                 return RedirectToAction("Carrito");
 
-            // Verificar stock
             foreach (var item in carritoItems)
             {
                 if (item.Producto!.Cantidad < item.Cantidad)
@@ -200,7 +265,6 @@ namespace LOGIN.Controllers
                 }
             }
 
-            // Crear pedido
             var total = carritoItems.Sum(c => c.Cantidad * c.Producto!.Precio);
             var pedido = new Pedido
             {
@@ -215,7 +279,6 @@ namespace LOGIN.Controllers
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
-            // Crear detalles y actualizar stock
             foreach (var item in carritoItems)
             {
                 var detalle = new PedidoDetalle
@@ -227,14 +290,16 @@ namespace LOGIN.Controllers
                 };
                 _context.PedidoDetalles.Add(detalle);
 
-                // Actualizar stock
                 item.Producto.Cantidad -= item.Cantidad;
                 _context.Entry(item.Producto).State = EntityState.Modified;
             }
 
-            // Limpiar carrito
             _context.CarritoItems.RemoveRange(carritoItems);
             await _context.SaveChangesAsync();
+
+            // 🔥 LIMPIAR CACHÉ
+            _cache.Remove($"carrito_items_{usuarioId}");
+            _cache.Remove($"carrito_count_{usuarioId}");
 
             TempData["Mensaje"] = "¡Pedido realizado con éxito!";
             return RedirectToAction("MisCompras");

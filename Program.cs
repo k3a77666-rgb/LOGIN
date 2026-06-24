@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Agregar controladores MVC y API
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
-
+builder.Services.AddMemoryCache();
 // Configurar PostgreSQL (Supabase)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
